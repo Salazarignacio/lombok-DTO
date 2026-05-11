@@ -1,5 +1,16 @@
 plugins {
     id("java")
+    application
+}
+
+application {
+    mainClass.set("org.example.Main")
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 group = "org.example"
@@ -11,10 +22,10 @@ repositories {
 
 dependencies {
     // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.34")
-    annotationProcessor("org.projectlombok:lombok:1.18.34")
-    testCompileOnly("org.projectlombok:lombok:1.18.34")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
+    compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
+    testCompileOnly("org.projectlombok:lombok:1.18.36")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
 
     // JUnit
     testImplementation(platform("org.junit:junit-bom:6.0.0"))
