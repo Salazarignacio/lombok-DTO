@@ -1,4 +1,4 @@
-package org.example;
+package org.example.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -6,6 +6,7 @@ import lombok.ToString;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.example.enums.Rol;
 
 @Data
 @SuperBuilder

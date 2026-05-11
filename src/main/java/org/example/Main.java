@@ -1,10 +1,14 @@
 package org.example;
 
+import org.example.enums.Rol;
+import org.example.model.Categoria;
+import org.example.model.Producto;
+import org.example.model.Usuario;
+
 import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) {
-
         Usuario user1 = Usuario.builder()
                 .id(2)
                 .nombre("Ignacio")
@@ -32,8 +36,6 @@ public class Main {
                 .disponible(true)
                 .imagen("lechita.jpg")
                 .build();
-
-
-        System.out.println("Usuario: " + user1);
+        cat1.agregarProductos(prod1);
     }
 }
