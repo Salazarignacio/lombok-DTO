@@ -1,8 +1,10 @@
 package org.example.model;
 
+import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
+@Data
 public class Producto extends Base {
     private String nombre;
     private double precio;
