@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Base {
-    private int id;
+    private Long id;
     private boolean eliminado;
     private LocalDateTime createdAt;
 }

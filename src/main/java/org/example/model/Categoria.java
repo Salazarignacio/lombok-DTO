@@ -1,11 +1,9 @@
 package org.example.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -13,12 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Data
-public class Categoria extends Base{
+public class Categoria extends Base {
     private String nombre;
     private String descripcion;
-    private List<Producto> productos;
+    @Builder.Default
+    private List<Producto> productos = new ArrayList<>();
 
-    public void agregarProductos(Producto prod){
+    public void agregarProducto(Producto prod) {
         this.productos.add(prod);
     }
 }

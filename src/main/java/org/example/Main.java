@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) {
-        Usuario user1 = Usuario.builder()
+         Usuario user1 = Usuario.builder()
                 .id(2)
                 .nombre("Ignacio")
                 .apellido("Salazar")
@@ -19,7 +19,6 @@ public class Main {
                 .celular("334466")
                 .rol(Rol.ADMIN)
                 .build();
-
         Categoria cat1 = Categoria.builder()
                 .id(2)
                 .createdAt(LocalDateTime.now())
@@ -51,8 +50,8 @@ public class Main {
                 .imagen("pan.jpg")
                 .build();
 
-        cat1.agregarProductos(prod1);
-        cat1.agregarProductos(prod2);
+        cat1.agregarProducto(prod1);
+        cat1.agregarProducto(prod2);
 
         Pedido pedido1 = Pedido.builder()
                 .id(1)
@@ -62,16 +61,12 @@ public class Main {
                 .formaPago(FormaPago.EFECTIVO)
                 .build();
 
-        DetallePedido detallePedido1 = DetallePedido.builder()
-                .id(1)
-                .eliminado(false)
-                .createdAt(LocalDateTime.now())
-                .cantidad(2)
-                .producto(prod1)
-                .build();
 
-        pedido1.addDetallePedido(2, prod2);
+        System.out.printf("Holaaaaaaaaa");
+       pedido1.addDetallePedido(2, prod2);
         pedido1.addDetallePedido(1, prod1);
-        /*pedido1.calcularTotal();*/
+        pedido1.calcularTotal();
+
+
     }
 }
