@@ -17,8 +17,9 @@ import org.example.enums.Rol;
 public class Usuario extends Base {
     private String nombre;
     private String apellido;
-    private String email;
+    private String mail;
     private String celular;
+    @ToString.Exclude
     private String contrasenia;
     private Rol rol;
 }

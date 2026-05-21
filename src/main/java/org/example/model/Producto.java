@@ -9,9 +9,9 @@ import lombok.experimental.SuperBuilder;
 @Data
 public class Producto extends Base {
     private String nombre;
-    private double precio;
+    private Double precio;
     private String descripcion;
     private int stock;
     private String imagen;
-    private boolean disponible;
+    private Boolean disponible;
 }
