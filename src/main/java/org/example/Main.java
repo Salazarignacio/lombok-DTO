@@ -9,6 +9,11 @@ import org.example.model.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.lang.reflect.Array.set;
 
 public class Main {
     public static void main(String[] args) {
@@ -48,7 +53,6 @@ public class Main {
                 .nombre("Almacén")
                 .descripcion("Productos de uso diario como arroz, fideos, harina, azúcar, etc.")
                 .build();
-
         Categoria cat3 = Categoria.builder()
                 .id(4L)
                 .createdAt(LocalDateTime.now())
@@ -75,11 +79,10 @@ public class Main {
                 .nombre("Pan")
                 .precio(3350.00)
                 .descripcion("Pan Blanco")
-                .stock(50)
+                .stock(3)
                 .disponible(true)
                 .imagen("pan.jpg")
                 .build();
-
         Producto prod3 = Producto.builder()
                 .id(4L)
                 .createdAt(LocalDateTime.now())
@@ -91,7 +94,6 @@ public class Main {
                 .disponible(true)
                 .imagen("leche.jpg")
                 .build();
-
         Producto prod4 = Producto.builder()
                 .id(5L)
                 .createdAt(LocalDateTime.now())
@@ -99,11 +101,10 @@ public class Main {
                 .nombre("Queso")
                 .precio(4200.00)
                 .descripcion("Queso Cremoso")
-                .stock(20)
+                .stock(2)
                 .disponible(true)
                 .imagen("queso.jpg")
                 .build();
-
         Producto prod5 = Producto.builder()
                 .id(6L)
                 .createdAt(LocalDateTime.now())
@@ -115,7 +116,6 @@ public class Main {
                 .disponible(true)
                 .imagen("arroz.jpg")
                 .build();
-
         Producto prod6 = Producto.builder()
                 .id(7L)
                 .createdAt(LocalDateTime.now())
@@ -127,7 +127,6 @@ public class Main {
                 .disponible(true)
                 .imagen("fideos.jpg")
                 .build();
-
         Producto prod7 = Producto.builder()
                 .id(8L)
                 .createdAt(LocalDateTime.now())
@@ -139,7 +138,6 @@ public class Main {
                 .disponible(true)
                 .imagen("azucar.jpg")
                 .build();
-
         Producto prod8 = Producto.builder()
                 .id(9L)
                 .createdAt(LocalDateTime.now())
@@ -151,7 +149,6 @@ public class Main {
                 .disponible(true)
                 .imagen("sal.jpg")
                 .build();
-
         Producto prod9 = Producto.builder()
                 .id(10L)
                 .createdAt(LocalDateTime.now())
@@ -163,7 +160,6 @@ public class Main {
                 .disponible(true)
                 .imagen("aceite.jpg")
                 .build();
-
         Producto prod10 = Producto.builder()
                 .id(11L)
                 .createdAt(LocalDateTime.now())
@@ -172,7 +168,7 @@ public class Main {
                 .precio(1900.00)
                 .descripcion("Harina de Trigo 000 1kg")
                 .stock(50)
-                .disponible(true)
+                .disponible(false)
                 .imagen("harina.jpg")
                 .build();
 
@@ -205,7 +201,6 @@ public class Main {
                 .estado(Estado.PENDIENTE)
                 .formaPago(FormaPago.EFECTIVO)
                 .build();
-
         Pedido pedido3 = Pedido.builder()
                 .id(3L)
                 .createdAt(LocalDateTime.now())
@@ -224,56 +219,74 @@ public class Main {
         pedido3.addDetallePedido(5, prod7);
         pedido3.addDetallePedido(2, prod5);
 
-        /*
-        4. En la clase Main se deberán tener las instancias solicitadas
-        en el punto anterior y se deberá utilizar el metodo toString para
-        mostrar por consola un producto, el listado de productos cargados
-        y los pedidos del usuario que posea la mayor cantidad de pedidos.
-        */
-        System.out.println(prod3.toString());
-        System.out.println(pedido1.getDetallePedidos());
-        System.out.println(pedido2.getDetallePedidos());
-        System.out.println(pedido3.getDetallePedidos());
-        System.out.println(user1.toString());
-        /*
-        5. Instanciar un nuevo producto donde el/los campos utilizados en
-        el metodo equals sean iguales a los de otro producto existente.
-        Luego, comparar dicha instancia con todos los elementos de la
-        colección de productos y mostrar los resultados por pantalla.
-        */
-        Producto prodEqual = Producto.builder()
-                .id(7L)
-                .createdAt(LocalDateTime.now())
-                .eliminado(false)
-                .nombre("Fideos")
-                .precio(2200.00)
-                .descripcion("Fideos Spaghetti 500g")
-                .stock(35)
-                .disponible(true)
-                .imagen("fideos.jpg")
-                .build();
-        System.out.println("Productos iguales --> " + prodEqual.equals(prod6));
-
-        List<Producto> todosLosProductos = List.of(prod1, prod2, prod3, prod4, prod5, prod6, prod7, prod8, prod9, prod10);
-        for (Producto p : todosLosProductos) {
-            System.out.println("¿Es prodEqual igual a " + p.getNombre() + "? " + prodEqual.equals(p));
-        }
-
-        /*
-        6. Crear un nuevo paquete llamado DTOs y, dentro de él, una clase
-         record llamada UsuarioDTO, que contendrá la misma información que
-          la clase Usuario, evitando mostrar información sensible. Se
-          deberán ocultar los siguientes atributos: a. Rol b. Contraseña
-        */
         UsuarioDTO userDTO1 = new UsuarioDTO(user1.getNombre()
-                ,user1.getApellido()
-                ,user1.getMail()
-                ,user1.getCelular());
+                , user1.getApellido()
+                , user1.getMail()
+                , user1.getCelular());
 
-        System.out.println(userDTO1.nombre());
-        System.out.println(userDTO1.apellido());
-        System.out.println(userDTO1.mail());
-        System.out.println(userDTO1.celular());
+        /* 1) Desarrolle un metodo en clase Pedido que se encargue de calcular el total. */
+        System.out.println("Total Pedido 3: $" + pedido3.calcularTotal());
+
+        /* 2) Mostrar por consola productos disponibles */
+        System.out.println("\n--- Productos Disponibles ---");
+        Set<Producto> prods = Set.of(prod1, prod2, prod3, prod4, prod5, prod6, prod7, prod8, prod9, prod10);
+        prods.stream()
+                .filter(Producto::getDisponible)
+                .forEach(System.out::println);
+
+        /* 3) Mostrar por consola la cantidad de ítems que tiene un pedido */
+        System.out.println("\n--- Cantidad de ítems en Pedido 2 ---");
+        int items = pedido2.getDetallePedidos().stream()
+                .mapToInt(DetallePedido::getCantidad)
+                .sum();
+        System.out.println("Items: " + items);
+
+        /* 4) Detectar productos que tengan menos de 5 como valor en stock */
+        System.out.println("\n--- Productos con bajo stock (<5) ---");
+        prods.stream()
+                .filter(p -> p.getStock() < 5)
+                .collect(Collectors.toList())
+                .forEach(System.out::println);
+
+        /* --- NUEVAS CONSULTAS (PARA CUMPLIR CON EL TP) --- */
+
+        /* 5) Agrupar productos por categoría */
+        System.out.println("\n--- Productos Agrupados por Categoría ---");
+        Map<String, List<Producto>> productosPorCategoria = List.of(cat1, cat2, cat3).stream()
+                .collect(Collectors.toMap(
+                        Categoria::getNombre,
+                        Categoria::getProductos
+                ));
+        productosPorCategoria.forEach((cat, lista) -> {
+            System.out.println("Categoría: " + cat);
+            lista.forEach(p -> System.out.println(" - " + p.getNombre()));
+        });
+
+        /* 6) Calcular facturación total (Suma de todos los pedidos terminados) */
+        Double facturacionTotal = List.of(pedido1, pedido2, pedido3).stream()
+                .filter(p -> p.getEstado() == Estado.TERMINADO)
+                .mapToDouble(Pedido::calcularTotal)
+                .sum();
+        System.out.println("\nFacturación Total (Pedidos Terminados): $" + facturacionTotal);
+
+        /* 7) Uso de flatMap: Lista de productos únicos comprados por un usuario */
+        System.out.println("\n--- Productos comprados por Ignacio Salazar ---");
+        List.of(pedido1, pedido2, pedido3).stream()
+                .filter(p -> p.getUsuario().getNombre().equals("Ignacio"))
+                .flatMap(p -> p.getDetallePedidos().stream())
+                .map(det -> det.getProducto().getNombre())
+                .distinct()
+                .forEach(name -> System.out.println(" - " + name));
+
+        /* 8) Uso de Optional para búsqueda segura */
+        System.out.println("\n--- Búsqueda de producto 'Harina' ---");
+        prods.stream()
+                .filter(p -> p.getNombre().equalsIgnoreCase("Harina"))
+                .findFirst()
+                .ifPresentOrElse(
+                        p -> System.out.println("Encontrado: " + p.getNombre() + " - Stock: " + p.getStock()),
+                        () -> System.out.println("Producto no encontrado")
+                );
 
     }
 }

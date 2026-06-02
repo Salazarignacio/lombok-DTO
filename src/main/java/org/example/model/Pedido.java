@@ -9,6 +9,7 @@ import org.example.interfaces.Calculable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
@@ -26,38 +27,24 @@ public class Pedido extends Base implements Calculable {
 
 
     public void addDetallePedido(int cant, Producto prod) {
-        DetallePedido detalleP = new DetallePedido(cant, prod);
-        detallePedidos.add(detalleP);
+        detallePedidos.add(new DetallePedido(cant, prod));
     }
 
-    public DetallePedido findDetallePedidoByProducto(Producto prod) {
-        for (DetallePedido det : detallePedidos) {
-            if (prod.equals(det.getProducto())) {
-                System.out.printf("Produto encontrado: %s\n", prod);
-                return det;
-            }
-        }
-        System.out.println("Produto no encontrado");
-        return null;
+    public java.util.Optional<DetallePedido> findDetallePedidoByProducto(Producto prod) {
+        return detallePedidos.stream()
+                .filter(det -> det.getProducto().equals(prod))
+                .findFirst();
     }
 
     public void deleteDetallePedidoByProducto(Producto prod) {
-        DetallePedido prodEncontrado = findDetallePedidoByProducto(prod);
-        if (prodEncontrado != null) {
-            for (DetallePedido det : detallePedidos) {
-                if (prodEncontrado.getProducto().equals(det.getProducto()))
-                    detallePedidos.remove(prodEncontrado);
-                return;
-            }
-        }
+        findDetallePedidoByProducto(prod)
+                .ifPresent(detallePedidos::remove);
     }
 
-    public void calcularTotal() {
-        Double total = 0.0;
-        for (DetallePedido det : detallePedidos) {
-            total += det.getSubtotal();
-        }
-        System.out.printf("Total: $ %.2f%n", total);
+    public Double calcularTotal() {
+        return detallePedidos.stream()
+                .mapToDouble(DetallePedido::getSubtotal)
+                .sum();
     }
 
     ;
