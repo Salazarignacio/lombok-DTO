@@ -3,13 +3,14 @@ package org.example.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
+import org.example.util.JPAUtil;
 
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class BaseRepository<T> {
-    private EntityManagerFactory emf;
+public abstract class BaseRepository<T> {
+    protected final EntityManagerFactory emf = JPAUtil.getEmf();
     private final Class<T> clazz;
 
     public T guardar(T entity) {
@@ -19,16 +20,16 @@ public class BaseRepository<T> {
             T resultado = em.merge(entity);
             em.getTransaction().commit();
             return resultado;
-        } catch (Exception e) {
+        } catch(Exception e){
             em.getTransaction().rollback();
             throw e;
-        } finally {
+        }finally {
             em.close();
         }
     }
 
     /*2. buscarPorId(Long id): retorna Optional<T> usando find(). Retorna Optional.empty() si no existe.*/
-    public Optional<T> buscar(Long id) {
+    public Optional<T> buscarPorId(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
             T resultado = em.find(clazz, id);
@@ -39,7 +40,7 @@ public class BaseRepository<T> {
     }
 
     /*3. listarActivos(): retorna List<T> con los registros cuyo campo eliminado = false. Usa JPQL.*/
-    public List<T> buscarTodos() {
+    public List<T> listarActivos() {
         EntityManager em = emf.createEntityManager();
         try {
             String jpql = "SELECT e FROM " + clazz.getSimpleName() + " e WHERE e.eliminado = false";
@@ -49,13 +50,14 @@ public class BaseRepository<T> {
         }
     }
 
-    /*4. eliminarLogico(Long id): busca la entidad por ID, establece eliminado = true y persiste el cambio. Retorna boolean indicando si encontro el registro.*/
+    /*4. eliminarLogico(Long id): busca la entidad por ID, establece eliminado = true y persiste el cambio.
+    Retorna boolean indicando si encontro el registro.*/
     public boolean eliminarLogico(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
             String jpql = "UPDATE " + clazz.getSimpleName() + " x SET  x.eliminado = true  WHERE x.id = :id";
-            int rowsChanged = em.createQuery(jpql, clazz).setParameter("id", id).executeUpdate();
+            int rowsChanged = em.createQuery(jpql).setParameter("id", id).executeUpdate();
             em.getTransaction().commit();
             return rowsChanged > 0;
         } catch (Exception e) {
