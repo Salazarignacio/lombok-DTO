@@ -1,5 +1,8 @@
 package org.example;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import org.example.DTOs.UsuarioDTO;
 import org.example.enums.Estado;
 import org.example.enums.FormaPago;
@@ -8,17 +11,18 @@ import org.example.model.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import java.util.stream.Collectors;
 
-import static java.lang.reflect.Array.set;
 
 public class Main {
     public static void main(String[] args) {
+
+        /*Clase principal con menu de consola que expone el ABM
+        de Categoria y Producto, y la consulta JPQL.*/
         Usuario user1 = Usuario.builder()
-                .id(2L)
+
                 .createdAt(LocalDateTime.now())
                 .nombre("Ignacio")
                 .apellido("Salazar")
@@ -29,7 +33,7 @@ public class Main {
                 .rol(Rol.ADMIN)
                 .build();
         Usuario user2 = Usuario.builder()
-                .id(3L)
+
                 .createdAt(LocalDateTime.now())
                 .nombre("Florencia")
                 .apellido("Campora")
@@ -39,22 +43,23 @@ public class Main {
                 .celular("99988")
                 .rol(Rol.USUARIO)
                 .build();
+
         Categoria cat1 = Categoria.builder()
-                .id(2L)
+
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Lacteos")
                 .descripcion("Productos lacteos")
                 .build();
         Categoria cat2 = Categoria.builder()
-                .id(3L)
+
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Almacén")
                 .descripcion("Productos de uso diario como arroz, fideos, harina, azúcar, etc.")
                 .build();
         Categoria cat3 = Categoria.builder()
-                .id(4L)
+
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Panadería")
@@ -62,7 +67,7 @@ public class Main {
                 .build();
 
         Producto prod1 = Producto.builder()
-                .id(2L)
+
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Leche")
@@ -73,7 +78,7 @@ public class Main {
                 .imagen("leche.jpg")
                 .build();
         Producto prod2 = Producto.builder()
-                .id(3L)
+
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Pan")
@@ -84,7 +89,6 @@ public class Main {
                 .imagen("pan.jpg")
                 .build();
         Producto prod3 = Producto.builder()
-                .id(4L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Leche")
@@ -95,7 +99,6 @@ public class Main {
                 .imagen("leche.jpg")
                 .build();
         Producto prod4 = Producto.builder()
-                .id(5L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Queso")
@@ -106,7 +109,6 @@ public class Main {
                 .imagen("queso.jpg")
                 .build();
         Producto prod5 = Producto.builder()
-                .id(6L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Arroz")
@@ -117,7 +119,6 @@ public class Main {
                 .imagen("arroz.jpg")
                 .build();
         Producto prod6 = Producto.builder()
-                .id(7L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Fideos")
@@ -128,7 +129,6 @@ public class Main {
                 .imagen("fideos.jpg")
                 .build();
         Producto prod7 = Producto.builder()
-                .id(8L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Azúcar")
@@ -139,7 +139,6 @@ public class Main {
                 .imagen("azucar.jpg")
                 .build();
         Producto prod8 = Producto.builder()
-                .id(9L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Sal")
@@ -150,7 +149,6 @@ public class Main {
                 .imagen("sal.jpg")
                 .build();
         Producto prod9 = Producto.builder()
-                .id(10L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Aceite")
@@ -161,7 +159,6 @@ public class Main {
                 .imagen("aceite.jpg")
                 .build();
         Producto prod10 = Producto.builder()
-                .id(11L)
                 .createdAt(LocalDateTime.now())
                 .eliminado(false)
                 .nombre("Harina")
@@ -186,29 +183,28 @@ public class Main {
         cat3.agregarProducto(prod2);
 
         Pedido pedido1 = Pedido.builder()
-                .id(1L)
                 .createdAt(LocalDateTime.now())
                 .fecha(LocalDate.now())
-                .usuario(user1)
                 .estado(Estado.PENDIENTE)
                 .formaPago(FormaPago.EFECTIVO)
                 .build();
+
         Pedido pedido2 = Pedido.builder()
-                .id(2L)
                 .createdAt(LocalDateTime.now())
                 .fecha(LocalDate.now())
-                .usuario(user1)
-                .estado(Estado.PENDIENTE)
+                .estado(Estado.CONFRIMADO)
                 .formaPago(FormaPago.EFECTIVO)
                 .build();
         Pedido pedido3 = Pedido.builder()
-                .id(3L)
                 .createdAt(LocalDateTime.now())
                 .fecha(LocalDate.now())
-                .usuario(user2)
                 .estado(Estado.TERMINADO)
                 .formaPago(FormaPago.TARJETA)
                 .build();
+
+        pedido1.setUsuario(user1);
+        pedido2.setUsuario(user1);
+        pedido3.setUsuario(user2);
 
         pedido1.addDetallePedido(4, prod1);
         pedido1.addDetallePedido(6, prod3);
@@ -224,69 +220,82 @@ public class Main {
                 , user1.getMail()
                 , user1.getCelular());
 
-        /* 1) Desarrolle un metodo en clase Pedido que se encargue de calcular el total. */
-        System.out.println("Total Pedido 3: $" + pedido3.calcularTotal());
+        pedido1.setUsuario(user1);
+        pedido2.setUsuario(user1);
+        pedido3.setUsuario(user2);
 
-        /* 2) Mostrar por consola productos disponibles */
-        System.out.println("\n--- Productos Disponibles ---");
-        Set<Producto> prods = Set.of(prod1, prod2, prod3, prod4, prod5, prod6, prod7, prod8, prod9, prod10);
-        prods.stream()
-                .filter(Producto::getDisponible)
-                .forEach(System.out::println);
+        Set<Usuario> usuarios = new HashSet<>(Set.of(user1, user2));
+        Set<Categoria> categorias = new HashSet<>(Set.of(cat1, cat2, cat3));
+        Set<Pedido> pedidos = new HashSet<>(Set.of(pedido1, pedido2, pedido3));
 
-        /* 3) Mostrar por consola la cantidad de ítems que tiene un pedido */
-        System.out.println("\n--- Cantidad de ítems en Pedido 2 ---");
-        int items = pedido2.getDetallePedidos().stream()
-                .mapToInt(DetallePedido::getCantidad)
-                .sum();
-        System.out.println("Items: " + items);
 
-        /* 4) Detectar productos que tengan menos de 5 como valor en stock */
-        System.out.println("\n--- Productos con bajo stock (<5) ---");
-        prods.stream()
-                .filter(p -> p.getStock() < 5)
-                .collect(Collectors.toList())
-                .forEach(System.out::println);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidad");
+        EntityManager em = emf.createEntityManager();
 
-        /* --- NUEVAS CONSULTAS (PARA CUMPLIR CON EL TP) --- */
 
-        /* 5) Agrupar productos por categoría */
-        System.out.println("\n--- Productos Agrupados por Categoría ---");
-        Map<String, List<Producto>> productosPorCategoria = List.of(cat1, cat2, cat3).stream()
-                .collect(Collectors.toMap(
-                        Categoria::getNombre,
-                        Categoria::getProductos
-                ));
-        productosPorCategoria.forEach((cat, lista) -> {
-            System.out.println("Categoría: " + cat);
-            lista.forEach(p -> System.out.println(" - " + p.getNombre()));
-        });
+        try {
+            em.getTransaction().begin();
+            recorredor(usuarios, em);
+            recorredor(categorias, em);
+            recorredor(pedidos, em);
+            em.getTransaction().commit();
 
-        /* 6) Calcular facturación total (Suma de todos los pedidos terminados) */
-        Double facturacionTotal = List.of(pedido1, pedido2, pedido3).stream()
-                .filter(p -> p.getEstado() == Estado.TERMINADO)
-                .mapToDouble(Pedido::calcularTotal)
-                .sum();
-        System.out.println("\nFacturación Total (Pedidos Terminados): $" + facturacionTotal);
+            /* --- TAREAS DE LA CONSIGNA --- */
 
-        /* 7) Uso de flatMap: Lista de productos únicos comprados por un usuario */
-        System.out.println("\n--- Productos comprados por Ignacio Salazar ---");
-        List.of(pedido1, pedido2, pedido3).stream()
-                .filter(p -> p.getUsuario().getNombre().equals("Ignacio"))
-                .flatMap(p -> p.getDetallePedidos().stream())
-                .map(det -> det.getProducto().getNombre())
-                .distinct()
-                .forEach(name -> System.out.println(" - " + name));
+            // 5. Actualizar al menos 2 productos
+            em.getTransaction().begin();
+            Producto p1 = em.find(Producto.class, 1L);
+            Producto p2 = em.find(Producto.class, 2L);
+            if (p1 != null) {
+                p1.setPrecio(p1.getPrecio() * 1.10);
+                System.out.println("Producto 1 actualizado: " + p1.getNombre());
+            }
+            if (p2 != null) {
+                p2.setStock(p2.getStock() + 20);
+                System.out.println("Producto 2 actualizado: " + p2.getNombre());
+            }
+            em.getTransaction().commit();
 
-        /* 8) Uso de Optional para búsqueda segura */
-        System.out.println("\n--- Búsqueda de producto 'Harina' ---");
-        prods.stream()
-                .filter(p -> p.getNombre().equalsIgnoreCase("Harina"))
-                .findFirst()
-                .ifPresentOrElse(
-                        p -> System.out.println("Encontrado: " + p.getNombre() + " - Stock: " + p.getStock()),
-                        () -> System.out.println("Producto no encontrado")
-                );
+            // 6. Buscar Usuario por id
+            Usuario userById = em.find(Usuario.class, 1L);
+            if (userById != null) {
+                System.out.println("Usuario encontrado por ID (1): " + userById.getNombre() + " " + userById.getApellido());
+            }
 
+            // 7. Buscar Usuario por mail
+            try {
+                Usuario userByMail = em.createQuery("SELECT u FROM Usuario u WHERE u.mail = :email", Usuario.class)
+                        .setParameter("email", "ignacio@example.com")
+                        .getSingleResult();
+                System.out.println("Usuario encontrado por mail: " + userByMail.getNombre() + " (" + userByMail.getMail() + ")");
+            } catch (Exception e) {
+                System.out.println("Usuario no encontrado por mail.");
+            }
+
+            // 8. Borrar 1 producto
+            em.getTransaction().begin();
+            Producto pAEliminar = em.find(Producto.class, 3L);
+            if (pAEliminar != null) {
+                em.remove(pAEliminar);
+                System.out.println("Producto 3 eliminado.");
+            }
+            em.getTransaction().commit();
+
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            em.close();
+            emf.close();
+        }
+
+    }
+
+    public static <E> void recorredor(Set<E> set, EntityManager em) {
+        for (E entidad : set) {
+            em.persist(entidad);
+        }
     }
 }

@@ -1,0 +1,32 @@
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+    <persistence-unit name="miUnidad">
+    <class>org.example.model.Pedido</class>
+    <class>org.example.model.Usuario</class>
+    <class>org.example.model.Producto</class>
+    <class>org.example.model.DetallePedido</class>
+    <class>org.example.model.Categoria</class>
+         <properties>
+             <!-- 1. Datos de conexión (Driver y URL) -->
+             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
+             <property name="jakarta.persistence.jdbc.url"
+                       value="jdbc:h2:file:C:/Usuario/salacrack/pedidos;AUTO_SERVER=TRUE" />
+             <property name="jakarta.persistence.jdbc.user" value="sa" />
+             <property name="jakarta.persistence.jdbc.password" value="" />
+
+             <!-- 2. Configuración de Hibernate  -->
+             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
+
+             <!-- 3. Crea las tablas automáticamente -->
+             <property name="hibernate.hbm2ddl.auto" value="update" />
+
+             <!-- 4. Consola -->
+             <property name="hibernate.show_sql" value="true" />
+             <property name="hibernate.format_sql" value="true" />
+             <property name="hibernate.highlight_sql" value="true"/>
+             <property name="hibernate.type" value="trace"/>
+         </properties>
+    </persistence-unit>
+</persistence>
