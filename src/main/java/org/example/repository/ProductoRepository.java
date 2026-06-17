@@ -10,8 +10,8 @@ public class ProductoRepository extends BaseRepository<Producto> {
     /*Extiende BaseRepository<Producto>.
      Agrega buscarPorCategoria(Long id) con JPQL.*/
 
-    public ProductoRepository(Class<Producto> clazz) {
-        super(clazz);
+    public ProductoRepository() {
+        super(Producto.class);
     }
 
     /*buscarPorCategoria(Long categoriaId): retorna List<Producto> con los productos activos

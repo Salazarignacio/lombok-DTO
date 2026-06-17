@@ -20,15 +20,14 @@ public abstract class BaseRepository<T> {
             T resultado = em.merge(entity);
             em.getTransaction().commit();
             return resultado;
-        } catch(Exception e){
+        } catch (Exception e) {
             em.getTransaction().rollback();
             throw e;
-        }finally {
+        } finally {
             em.close();
         }
     }
 
-    /*2. buscarPorId(Long id): retorna Optional<T> usando find(). Retorna Optional.empty() si no existe.*/
     public Optional<T> buscarPorId(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -39,7 +38,6 @@ public abstract class BaseRepository<T> {
         }
     }
 
-    /*3. listarActivos(): retorna List<T> con los registros cuyo campo eliminado = false. Usa JPQL.*/
     public List<T> listarActivos() {
         EntityManager em = emf.createEntityManager();
         try {
@@ -50,8 +48,6 @@ public abstract class BaseRepository<T> {
         }
     }
 
-    /*4. eliminarLogico(Long id): busca la entidad por ID, establece eliminado = true y persiste el cambio.
-    Retorna boolean indicando si encontro el registro.*/
     public boolean eliminarLogico(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
