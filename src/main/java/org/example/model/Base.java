@@ -20,7 +20,7 @@ public class Base {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private boolean eliminado;
+    private boolean eliminado = false;
     @EqualsAndHashCode.Exclude
     private LocalDateTime createdAt = LocalDateTime.now();
 }
