@@ -39,8 +39,12 @@ public class Main {
         List<Categoria> categorias = repositorioCategoria.listarActivos();
         Categoria ultimaCategoria = categorias.get(categorias.size() - 1);
         categoria1.setId(ultimaCategoria.getId());
-        System.out.println(categoria1.getId());
+        System.out.println("Categoria creada con ID: " + categoria1.getId());
         /*7. Baja logica: solicitar el ID, marcar eliminado = true. Si no existe, mostrar mensaje de error.*/
+        for (Categoria cat : categorias) {
+            System.out.println("ID: " + cat.getId());
+            System.out.println("Nombre: " + cat.getNombre());
+        }
         System.out.print("Ingrese el ID que desea eliminar: ");
         Long eliminarID = Long.parseLong(scanner.nextLine());
         Optional<Categoria> catAEliminar = repositorioCategoria.buscarPorId(eliminarID);
@@ -98,7 +102,7 @@ persistir.*/
         for (Categoria cat : repositorioCategoria.listarActivos()) {
             System.out.println("ID: " + cat.getId());
             System.out.println("Nombre: " + cat.getNombre());
-            System.out.println("Categoria: " + cat.getDescripcion());
+            System.out.println("Descripcion: " + cat.getDescripcion());
         }
  /*10. Alta: listar categorias activas para seleccionar, solicitar nombre, precio, descripcion y stock,
 persistir.*/
@@ -110,30 +114,33 @@ persistir.*/
         }
         Long idSeleccionado = Long.parseLong(scanner.nextLine());
         Optional<Categoria> catSeleccionada = repositorioCategoria.buscarPorId(idSeleccionado);
-        System.out.println("Ingrese nombre de nuevo producto");
-        String nombreProducto = scanner.nextLine();
-        System.out.println("Ingrese el precio");
-        Double precioProducto = Double.parseDouble(scanner.nextLine());
-        System.out.println("Ingrese descripcion");
-        String descripcionProducto = scanner.nextLine();
-        Producto nuevoProducto = Producto.builder()
-                .createdAt(LocalDateTime.now())
-                .eliminado(false)
-                .nombre(nombreProducto)
-                .categoria(catSeleccionada.get())
-                .precio(precioProducto)
-                .descripcion(descripcionProducto)
-                .build();
-        repositorioProducto.guardar(nuevoProducto);
-        List<Producto> productos = repositorioProducto.listarActivos();
-        Producto ultimoProducto = productos.get(productos.size() - 1);
-        nuevoProducto.setId(ultimoProducto.getId());
-        /*11. Baja logica: solicitar el ID del producto. Si no existe o ya esta dado de baja, mostrar error.*/
-        System.out.println("Elija el ID de un producto para eliminar");
-        for (Producto prod : productos) {
-            System.out.println("ID: " + prod.getId());
-            System.out.println("ID: " + prod.getNombre());
+
+        if (catSeleccionada.isPresent()) {
+            System.out.println("Ingrese nombre de nuevo producto");
+            String nombreProducto = scanner.nextLine();
+            System.out.println("Ingrese el precio");
+            Double precioProducto = Double.parseDouble(scanner.nextLine());
+            System.out.println("Ingrese descripcion");
+            String descripcionProducto = scanner.nextLine();
+            Producto nuevoProducto = Producto.builder()
+                    .createdAt(LocalDateTime.now())
+                    .eliminado(false)
+                    .nombre(nombreProducto)
+                    .categoria(catSeleccionada.get())
+                    .precio(precioProducto)
+                    .descripcion(descripcionProducto)
+                    .build();
+            repositorioProducto.guardar(nuevoProducto);
+            List<Producto> productos = repositorioProducto.listarActivos();
+            Producto ultimoProducto = productos.get(productos.size() - 1);
+            nuevoProducto.setId(ultimoProducto.getId());
         }
+        /*11. Baja logica: solicitar el ID del producto. Si no existe o ya esta dado de baja, mostrar error.*/
+        for (Producto prod : repositorioProducto.listarActivos()) {
+            System.out.println("ID: " + prod.getId());
+            System.out.println("Nombre: " + prod.getNombre());
+        }
+        System.out.println("Elija el ID de un producto para eliminar");
         Long idProdAEliminar = Long.parseLong(scanner.nextLine());
         Optional<Producto> prodElegido = repositorioProducto.buscarPorId(idProdAEliminar);
         if (prodElegido != null && !prodElegido.get().isEliminado()) {
@@ -144,7 +151,7 @@ persistir.*/
         }
         /*12. Modificacion: solicitar el ID, mostrar valores actuales, permitir editar nombre, precio y stock.*/
         System.out.println("Ingrese el ID del producto a modificar");
-        for (Producto prod : productos) {
+        for (Producto prod : repositorioProducto.listarActivos()) {
             System.out.println("ID: " + prod.getId());
             System.out.println("ID: " + prod.getNombre());
         }
@@ -190,7 +197,7 @@ persistir.*/
         }
         /*13. Listado: mostrar todos los productos activos con ID, nombre, precio, stock y nombre de su
         categoria*/
-        for (Producto prod : productos) {
+        for (Producto prod : repositorioProducto.listarActivos()) {
             System.out.println("ID: " + prod.getId());
             System.out.println("Nombre: " + prod.getNombre());
             System.out.println("Precio: " + prod.getPrecio());
