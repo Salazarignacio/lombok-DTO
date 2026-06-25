@@ -1,14 +1,13 @@
 package org.example.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -19,14 +18,10 @@ import java.util.List;
 public class Categoria extends Base {
     private String nombre;
     private String descripcion;
-    @OneToMany(mappedBy = "categoria", cascade =  CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @Builder.Default
-    private List<Producto> productos = new ArrayList<>();
-
-    public void agregarProducto(Producto prod) {
-        this.productos.add(prod);
-        prod.setCategoria(this);
-    }
+    @JoinColumn(referencedColumnName = "categoria_id")
+    private Set<Producto> productos = new HashSet<>();
 }

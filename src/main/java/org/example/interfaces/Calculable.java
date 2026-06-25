@@ -1,5 +1,5 @@
 package org.example.interfaces;
 
 public interface Calculable {
-    Double calcularTotal();
+    public void calcularTotal();
 }

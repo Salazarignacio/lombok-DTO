@@ -20,9 +20,4 @@ public class Producto extends Base {
     private int stock;
     private String imagen;
     private Boolean disponible;
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private Categoria categoria;
 }

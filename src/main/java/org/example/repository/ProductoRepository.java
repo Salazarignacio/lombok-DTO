@@ -7,16 +7,11 @@ import org.example.model.Producto;
 import java.util.List;
 
 public class ProductoRepository extends BaseRepository<Producto> {
-    /*Extiende BaseRepository<Producto>.
-     Agrega buscarPorCategoria(Long id) con JPQL.*/
 
     public ProductoRepository() {
         super(Producto.class);
     }
 
-    /*buscarPorCategoria(Long categoriaId): retorna List<Producto> con los productos activos
-    de esa categoria. La consulta debe escribirse en JPQL con un parametro nombrado, filtrar
-    por eliminado = false, y retornar un List<Producto>. */
     public List<Producto> buscarPorCategoria(Long id) {
         EntityManager em = emf.createEntityManager();
         try {

@@ -36,13 +36,13 @@ public class Pedido extends Base implements Calculable {
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName = "pedido_id")
     private Set<DetallePedido> detallePedidos = new HashSet<DetallePedido>();
 
 
     public void addDetallePedido(int cant, Producto prod) {
-        DetallePedido det = new DetallePedido( cant, prod);
-        det.setPedido(this);
+        DetallePedido det = new DetallePedido(cant, prod);
         detallePedidos.add(det);
     }
 
@@ -57,8 +57,8 @@ public class Pedido extends Base implements Calculable {
                 .ifPresent(detallePedidos::remove);
     }
 
-    public Double calcularTotal() {
-        return detallePedidos.stream()
+    public void calcularTotal() {
+        this.total = detallePedidos.stream()
                 .map(det -> det.getSubtotal()).reduce(0.0, (a, b) -> a + b);
     }
 }

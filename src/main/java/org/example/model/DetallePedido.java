@@ -17,16 +17,9 @@ public class DetallePedido extends Base {
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @ManyToOne
-    @Setter(AccessLevel.PACKAGE)
-    @JoinColumn(name = "pedido_id")
-    private Pedido pedido;
 
     public DetallePedido(int cantidad, Producto producto) {
         super();
-        this.setCreatedAt(java.time.LocalDateTime.now());
         this.producto = producto;
         this.setCantidad(cantidad);
     }

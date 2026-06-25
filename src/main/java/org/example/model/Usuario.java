@@ -1,23 +1,22 @@
 package org.example.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.example.enums.Rol;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
 @SuperBuilder
+@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
-@Table(name="USUARIOS")
+@Table(name = "USUARIOS")
 public class Usuario extends Base {
     private String nombre;
     private String apellido;
@@ -26,18 +25,9 @@ public class Usuario extends Base {
     @ToString.Exclude
     private String contrasenia;
     private Rol rol;
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName = "usuario_id")
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     @Builder.Default
-    private Set<Pedido> pedidos = new HashSet<>();
-
-    public void addPedido(Pedido pedido) {
-        pedidos.add(pedido);
-        pedido.setUsuario(this);
-    }
-    public void removePedido(Pedido pedido) {
-        pedidos.remove(pedido);
-        pedido.setUsuario(null);
-    }
+    private List<Pedido> pedidos;
 }
