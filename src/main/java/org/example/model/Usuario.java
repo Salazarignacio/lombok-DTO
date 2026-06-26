@@ -24,8 +24,8 @@ public class Usuario extends Base {
     @ToString.Exclude
     private String contrasenia;
     private Rol rol;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(referencedColumnName = "usuario_id")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, targetEntity = Pedido.class)
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     @ToString.Exclude
     @Builder.Default
     private Set pedidos = new HashSet();

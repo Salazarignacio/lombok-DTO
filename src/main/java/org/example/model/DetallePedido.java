@@ -15,7 +15,7 @@ public class DetallePedido extends Base {
     @Transient
     private Double subtotal;
     @ManyToOne
-    @JoinColumn(name = "producto_id")
+    @JoinColumn(name = "producto_id", referencedColumnName = "id")
     private Producto producto;
 
     public DetallePedido(int cantidad, Producto producto) {

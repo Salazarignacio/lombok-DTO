@@ -162,11 +162,12 @@ public class Main {
                     Producto nuevoProducto = Producto.builder()
                             .createdAt(LocalDateTime.now())
                             .nombre(nombreProducto)
-                            /*.categoria(catSeleccionada.get())*/
                             .precio(precioProducto)
                             .descripcion(descripcionProducto)
                             .build();
                     Producto prodGuardado = repositorioProducto.guardar(nuevoProducto);
+                    /*Ver esto*/
+                    catSeleccionada.get().getProductos().add(prodGuardado);
 
                     System.out.println("");
                     System.out.println("Producto creado con ID: " + prodGuardado.getId());
@@ -266,6 +267,8 @@ public class Main {
                 if (categoriaElegida.isPresent()) {
                     List<Producto> productos = repositorioProducto.buscarPorCategoria(categoriaElegida.get().getId());
                     if (productos.size() < 1) {
+
+                        System.out.println(productos);
                         System.out.println("La categoria esta vacia");
                         break;
                     }

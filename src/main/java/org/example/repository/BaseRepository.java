@@ -42,7 +42,9 @@ public abstract class BaseRepository<T> {
         EntityManager em = emf.createEntityManager();
         try {
             T resultado = em.find(clazz, id);
-            return Optional.ofNullable(resultado);
+            if (resultado != null) {
+                return Optional.ofNullable(resultado);
+            } else return Optional.empty();
         } finally {
             em.close();
         }
@@ -60,12 +62,19 @@ public abstract class BaseRepository<T> {
 
     public boolean eliminarLogico(Long id) {
         EntityManager em = emf.createEntityManager();
+        Optional<T> optional = buscarPorId(id);
+        if (!optional.isPresent()) {
+            return false;
+        }
         try {
             em.getTransaction().begin();
-            String jpql = "UPDATE " + clazz.getSimpleName() + " x SET  x.eliminado = true  WHERE x.id = :id";
-            int rowsChanged = em.createQuery(jpql).setParameter("id", id).executeUpdate();
+            T resultado = optional.get();
+            if (resultado instanceof Base baseEntity) {
+                baseEntity.setEliminado(true);
+            }
+            em.merge(resultado);
             em.getTransaction().commit();
-            return rowsChanged > 0;
+            return true;
         } catch (Exception e) {
             em.getTransaction().rollback();
             throw new RuntimeException(e);
