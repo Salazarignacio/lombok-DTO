@@ -3,10 +3,9 @@ package org.example.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.example.enums.Rol;
+import org.example.model.enums.Rol;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -29,5 +28,5 @@ public class Usuario extends Base {
     @JoinColumn(referencedColumnName = "usuario_id")
     @ToString.Exclude
     @Builder.Default
-    private List<Pedido> pedidos;
+    private Set pedidos = new HashSet();
 }

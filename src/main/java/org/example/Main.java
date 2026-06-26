@@ -44,11 +44,9 @@ public class Main {
                         .nombre(nombreCategoria)
                         .descripcion(descripcionCategoria)
                         .build();
-                repositorioCategoria.guardar(categoria1);
-                List<Categoria> categorias = repositorioCategoria.listarActivos();
-                Categoria ultimaCategoria = categorias.get(categorias.size() - 1);
-                categoria1.setId(ultimaCategoria.getId());
-                System.out.println("########### Categoria creada con ID: " + categoria1.getId() + " ###########");
+                Categoria catGuardada = repositorioCategoria.guardar(categoria1);
+
+                System.out.println("########### Categoria creada con ID: " + catGuardada.getId() + " ###########");
                 break;
             case 2:
                 System.out.print("Ingrese el ID que desea eliminar: ");
@@ -164,16 +162,14 @@ public class Main {
                     Producto nuevoProducto = Producto.builder()
                             .createdAt(LocalDateTime.now())
                             .nombre(nombreProducto)
-                            .categoria(catSeleccionada.get())
+                            /*.categoria(catSeleccionada.get())*/
                             .precio(precioProducto)
                             .descripcion(descripcionProducto)
                             .build();
-                    repositorioProducto.guardar(nuevoProducto);
-                    List<Producto> productos = repositorioProducto.listarActivos();
-                    Producto ultimoProducto = productos.get(productos.size() - 1);
-                    nuevoProducto.setId(ultimoProducto.getId());
+                    Producto prodGuardado = repositorioProducto.guardar(nuevoProducto);
+
                     System.out.println("");
-                    System.out.println("Producto creado con ID: " + nuevoProducto.getId());
+                    System.out.println("Producto creado con ID: " + prodGuardado.getId());
                     System.out.println("");
                 }
                 break;
@@ -251,7 +247,7 @@ public class Main {
                     System.out.println("Nombre: " + prod.getNombre());
                     System.out.println("Precio: " + prod.getPrecio());
                     System.out.println("Stock: " + prod.getStock());
-                    System.out.println("Categoria: " + prod.getCategoria().getNombre());
+                    /*System.out.println("Categoria: " + prod.getCategoria().getNombre());*/
                 }
                 break;
             case 5:
@@ -293,8 +289,11 @@ public class Main {
         System.out.println("");
         System.out.println("1 Manejar Categorias");
         System.out.println("2 Manejar Productos");
+        System.out.println("0 Terminar");
         int opcion1 = scanner.nextInt();
         switch (opcion1) {
+            case 0:
+                JPAUtil.close();
             case 1:
                 handleCategoria();
             case 2:

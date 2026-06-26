@@ -3,15 +3,12 @@ package org.example.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.example.enums.Estado;
-import org.example.enums.FormaPago;
+import org.example.model.enums.Estado;
+import org.example.model.enums.FormaPago;
 import org.example.interfaces.Calculable;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @SuperBuilder
@@ -37,12 +34,12 @@ public class Pedido extends Base implements Calculable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(referencedColumnName = "pedido_id")
     private Set<DetallePedido> detallePedidos = new HashSet<DetallePedido>();
 
 
     public void addDetallePedido(int cant, Producto prod) {
         DetallePedido det = new DetallePedido(cant, prod);
+
         detallePedidos.add(det);
     }
 

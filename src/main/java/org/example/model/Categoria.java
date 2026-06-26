@@ -18,10 +18,10 @@ import java.util.Set;
 public class Categoria extends Base {
     private String nombre;
     private String descripcion;
-    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @Builder.Default
-    @JoinColumn(referencedColumnName = "categoria_id")
+    @JoinColumn(name = "categoria_id",referencedColumnName = "id")
     private Set<Producto> productos = new HashSet<>();
 }

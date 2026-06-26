@@ -3,6 +3,7 @@ package org.example.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
+import org.example.model.Base;
 import org.example.util.JPAUtil;
 
 import java.util.List;
@@ -17,7 +18,16 @@ public abstract class BaseRepository<T> {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            T resultado = em.merge(entity);
+            T resultado = null;
+            if (entity instanceof Base baseEntity) {
+                Long id = baseEntity.getId();
+                if (id == null) {
+                    em.persist(entity);
+                    resultado = entity;
+                } else {
+                    resultado = em.merge(entity);
+                }
+            }
             em.getTransaction().commit();
             return resultado;
         } catch (Exception e) {
