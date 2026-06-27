@@ -4,8 +4,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import org.example.model.*;
+import org.example.model.enums.Rol;
 import org.example.repository.CategoriaRepository;
 import org.example.repository.ProductoRepository;
+import org.example.repository.UsuarioRepository;
 import org.example.util.JPAUtil;
 
 import java.time.LocalDateTime;
@@ -182,7 +184,7 @@ public class Main {
                     System.out.println("El producto esta disponible? S/N");
                     String eliminadoProducto = scanner.nextLine();
                     boolean eliminado = true;
-                    if (eliminadoProducto.trim().equalsIgnoreCase("s")){
+                    if (eliminadoProducto.trim().equalsIgnoreCase("s")) {
                         eliminado = false;
                     }
                     Producto nuevoProducto = Producto.builder()
@@ -276,7 +278,6 @@ public class Main {
                     System.out.println("Nombre: " + prod.getNombre());
                     System.out.println("Precio: " + prod.getPrecio());
                     System.out.println("Stock: " + prod.getStock());
-                    /*System.out.println("Categoria: " + prod.getCategoria().getNombre());*/
                 }
                 break;
             case 5:
@@ -312,6 +313,82 @@ public class Main {
         handleProducto();
     }
 
+    public static void handleUsuario() {
+        System.out.println("");
+        System.out.println("-- Gestion Usuario --");
+        System.out.println("");
+        UsuarioRepository repositorioUsuaraio = new UsuarioRepository();
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("1 Crear Usuario");
+
+        int opcionUsuario = Integer.parseInt(scanner.nextLine());
+        switch (opcionUsuario) {
+            case 0:
+                System.out.println("Descartado");
+                handleMenu();
+                break;
+            case 1:
+                System.out.println("Ingrese nombre");
+                String nombreUsuario = scanner.nextLine();
+                if (nombreUsuario.length() < 1) {
+                    System.out.println("El nombre no puede estar vacio");
+                    handleMenu();
+                }
+                System.out.println("Ingrese apellido");
+                String apellidoUsuario = scanner.nextLine();
+                if (apellidoUsuario.length() < 1) {
+                    System.out.println("El apellido no puede estar vacio");
+                    handleMenu();
+                }
+                System.out.println("Ingrese mail");
+                String mailUsuario = scanner.nextLine().trim();
+                Optional<Usuario> usuarioEncontrado = repositorioUsuaraio.buscarPorMail(mailUsuario);
+                while (usuarioEncontrado.isPresent()) {
+                    System.out.println("El mail ya fue asignado a un usuario, elija un mail nuevo");
+                    mailUsuario = scanner.nextLine().trim();
+                    usuarioEncontrado = repositorioUsuaraio.buscarPorMail(mailUsuario);
+                }
+                if (mailUsuario.length() < 1) {
+                    System.out.println("El mail no puede estar vacio");
+                    handleMenu();
+                }
+                System.out.println("Ingrese celular (Opcional)");
+                String celularUsuario = scanner.nextLine();
+                System.out.println("Ingrese password");
+                String passwordUsuario = scanner.nextLine();
+                if (passwordUsuario.length() < 1) {
+                    System.out.println("El password no puede estar vacio");
+                    handleMenu();
+                }
+                System.out.println("Elija un rol");
+                System.out.println("Ingrese A para ADMIN");
+                System.out.println("Ingrese U para USUARIO");
+                String rolUsuario = scanner.nextLine();
+                Rol rolSeleccionado = null;
+                if (rolUsuario.trim().equalsIgnoreCase("u")) {
+                    rolSeleccionado = Rol.USUARIO;
+                } else if (rolUsuario.trim().equalsIgnoreCase("a")) {
+                    rolSeleccionado = Rol.ADMIN;
+                } else {
+                    System.out.println("Opcion invalida");
+                    handleMenu();
+                }
+                Usuario usuarioCreado = Usuario.builder()
+                        .nombre(nombreUsuario)
+                        .apellido(apellidoUsuario)
+                        .celular(celularUsuario)
+                        .contrasenia(passwordUsuario)
+                        .rol(rolSeleccionado)
+                        .build();
+                Usuario usuarioGestionado = repositorioUsuaraio.guardar(usuarioCreado);
+                System.out.println("Usuario guardado con ID: " + usuarioGestionado.getId());
+                break;
+            case 4:
+                repositorioUsuaraio.listarActivos().stream().forEach(u -> System.out.println(u));
+        }
+    }
+
     public static void handleMenu() {
         System.out.println("-- Menu Principal --");
         System.out.println("");
@@ -320,15 +397,22 @@ public class Main {
         System.out.println("");
         System.out.println("1 Manejar Categorias");
         System.out.println("2 Manejar Productos");
+        System.out.println("3 Manejar Usuarios");
         System.out.println("0 Terminar");
         int opcion1 = scanner.nextInt();
         switch (opcion1) {
             case 0:
                 JPAUtil.close();
+                break;
             case 1:
                 handleCategoria();
+                break;
             case 2:
                 handleProducto();
+                break;
+            case 3:
+                handleUsuario();
+                break;
         }
     }
 }
