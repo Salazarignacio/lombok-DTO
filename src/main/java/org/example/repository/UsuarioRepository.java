@@ -2,6 +2,7 @@ package org.example.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import org.example.model.Pedido;
 import org.example.model.Usuario;
 
 import java.util.List;
@@ -13,23 +14,32 @@ public class UsuarioRepository extends BaseRepository<Usuario> {
     }
 
     public Optional<Usuario> buscarPorMail(String mail) {
-            EntityManager em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         try {
-            em.getTransaction().begin();
             // Consulta JPQL: busca un usuario activo por su dirección de correo electrónico
             // Retorna Optional para manejar el caso en que el mail no esté registrado
             String jpql = "SELECT u FROM Usuario u WHERE u.mail = :mail AND u.eliminado = false";
             TypedQuery<Usuario> q = em.createQuery(jpql, Usuario.class);
             q.setParameter("mail", mail);
             List<Usuario> res = q.getResultList();
-            em.getTransaction().commit();
+
             return res.isEmpty() ? Optional.empty() : Optional.of(res.get(0));
+        } finally {
+            em.close();
         }
-        catch (Exception e) {
-            em.getTransaction().rollback();
-            return Optional.empty();
-        }
-        finally {
+    }
+
+    public List<Pedido> BuscarPedidosPorUsuario(Long idUsuario) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            // Consulta JPQL: retorna los pedidos activos de un usuario.
+            // Como la relación es unidireccional y Usuario es el dueño, se navega
+            // desde Usuario hacia su colección u.pedidos mediante JOIN.
+            // Se filtra por el id del usuario (:uid) y por p.eliminado = false
+            // para excluir las bajas lógicas.
+            String jpql = "SELECT p FROM Usuario u JOIN u.pedidos p WHERE u.id = :uid AND p.eliminado = false";
+            return em.createQuery(jpql, Pedido.class).setParameter("uid", idUsuario).getResultList();
+        } finally {
             em.close();
         }
     }

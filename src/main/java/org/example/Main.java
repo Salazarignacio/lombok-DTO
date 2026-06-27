@@ -152,25 +152,53 @@ public class Main {
                 Long idSeleccionado = Long.parseLong(scanner.nextLine());
                 Optional<Categoria> catSeleccionada = repositorioCategoria.buscarPorId(idSeleccionado);
 
-                if (catSeleccionada.isPresent()) {
+
+                if (!catSeleccionada.isPresent()) {
+                    System.out.println("ERROR. El id no corresponde a ninguna categoria");
+                    handleProducto();
+                } else {
                     System.out.println("Ingrese nombre de nuevo producto");
                     String nombreProducto = scanner.nextLine();
-                    System.out.println("Ingrese el precio");
-                    Double precioProducto = Double.parseDouble(scanner.nextLine());
+                    if (nombreProducto.length() <= 0) {
+                        System.out.println("El nombre es obligatorio");
+                        handleProducto();
+                    }
                     System.out.println("Ingrese descripcion");
                     String descripcionProducto = scanner.nextLine();
+                    System.out.println("Ingrese el precio");
+                    Double precioProducto = Double.parseDouble(scanner.nextLine());
+                    if (precioProducto <= 0) {
+                        System.out.println("El precio no puede ser un numero negativo");
+                        handleProducto();
+                    }
+                    System.out.println("Ingrese el stock");
+                    int stockProducto = Integer.parseInt(scanner.nextLine());
+                    if (stockProducto < 0) {
+                        System.out.println("El stock no puede ser un numero negativo");
+                        handleProducto();
+                    }
+                    System.out.println("Ingrese url de la imagen (Opcional)");
+                    String imagenProducto = scanner.nextLine();
+                    System.out.println("El producto esta disponible? S/N");
+                    String eliminadoProducto = scanner.nextLine();
+                    boolean eliminado = true;
+                    if (eliminadoProducto.trim().equalsIgnoreCase("s")){
+                        eliminado = false;
+                    }
                     Producto nuevoProducto = Producto.builder()
-                            .createdAt(LocalDateTime.now())
                             .nombre(nombreProducto)
                             .precio(precioProducto)
+                            .stock(stockProducto)
                             .descripcion(descripcionProducto)
+                            .imagen(imagenProducto)
+                            .eliminado(eliminado)
                             .build();
                     Producto prodGuardado = repositorioProducto.guardar(nuevoProducto);
-                    /*Ver esto*/
-                    catSeleccionada.get().getProductos().add(prodGuardado);
+                    repositorioCategoria.agregarProductoACategoria(idSeleccionado, prodGuardado);
 
                     System.out.println("");
                     System.out.println("Producto creado con ID: " + prodGuardado.getId());
+                    System.out.println("Categoria: " + catSeleccionada.get().getNombre());
                     System.out.println("");
                 }
                 break;
