@@ -522,26 +522,26 @@ public class Main {
                         break;
                 }
 
-                List<Producto> productosAAgregar = new ArrayList<>();
+                Map<Long, Integer> productosAAgregar = new HashMap<>();
                 Boolean seguir = true;
                 while (seguir) {
                     repositorioProducto.listarActivos().stream().forEach(u -> {
                         System.out.println("ID: " + u.getId() + " Nombre: " + u.getNombre() + " Precio: $" + u.getPrecio() + " Stock: $" + u.getStock());
                     });
                     Long idProducto = Long.parseLong(scanner.nextLine());
-                    Optional<Producto> productoEcontrado = repositorioProducto.buscarPorId(idProducto);
-                    if (!productoEcontrado.isPresent() || !productoEcontrado.get().getDisponible()) {
+                    Optional<Producto> productoEncontrado = repositorioProducto.buscarPorId(idProducto);
+                    if (!productoEncontrado.isPresent() || !productoEncontrado.get().getDisponible()) {
                         System.out.println("Producto no encontrado");
                         continue;
                     }
-                    int stockDiponible = productoEcontrado.get().getStock();
+                    int stockDiponible = productoEncontrado.get().getStock();
                     System.out.println("Ingrese la cantidad, stock disponible: " + stockDiponible);
                     int cantidad = Integer.parseInt(scanner.nextLine());
                     if (cantidad < 1 || cantidad > stockDiponible) {
-                        System.out.println("La cantidad no puede ser 0 o menor al stock disponible");
+                        System.out.println("La cantidad debe ser mayor a 0 y no superar el stock disponible");
                         continue;
                     }
-                    productosAAgregar.add(productoEcontrado.get());
+                    productosAAgregar.put(productoEncontrado.get().getId(), cantidad);
                     System.out.println("Desea agregar otro producto?");
                     System.out.println("1 Si");
                     System.out.println("2 No");
