@@ -3,9 +3,12 @@ package org.example;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
+import jakarta.persistence.Persistence;
 import org.example.model.*;
+import org.example.model.enums.FormaPago;
 import org.example.model.enums.Rol;
 import org.example.repository.CategoriaRepository;
+import org.example.repository.PedidoRepository;
 import org.example.repository.ProductoRepository;
 import org.example.repository.UsuarioRepository;
 import org.example.util.JPAUtil;
@@ -98,11 +101,14 @@ public class Main {
                     }
                     EntityManagerFactory emf = JPAUtil.getEmf();
                     EntityManager em = emf.createEntityManager();
-                    em.getTransaction().begin();
-                    em.merge(catAModificar);
-                    em.getTransaction().commit();
-                    em.close();
-                    System.out.println("Categoria modificada");
+                    try {
+                        em.getTransaction().begin();
+                        em.merge(catAModificar);
+                        em.getTransaction().commit();
+                        System.out.println("Categoria modificada");
+                    } finally {
+                        em.close();
+                    }
                 } else {
                     System.out.println("No se encontro ID");
                 }
@@ -161,7 +167,7 @@ public class Main {
                 } else {
                     System.out.println("Ingrese nombre de nuevo producto");
                     String nombreProducto = scanner.nextLine();
-                    if (nombreProducto.length() <= 0) {
+                    if (nombreProducto.length() == 0) {
                         System.out.println("El nombre es obligatorio");
                         handleProducto();
                     }
@@ -273,21 +279,13 @@ public class Main {
                     em.close();
                 }
             case 4:
-                for (Producto prod : repositorioProducto.listarActivos()) {
-                    System.out.println("ID: " + prod.getId());
-                    System.out.println("Nombre: " + prod.getNombre());
-                    System.out.println("Precio: " + prod.getPrecio());
-                    System.out.println("Stock: " + prod.getStock());
-                }
+                repositorioProducto.listarActivos()
+                        .stream()
+                        .forEach(a -> System.out.println("ID: " + a.getId() + "\n" + "Nombre: " + a.getNombre() + "\n" + "Precio: " + a.getPrecio() + "\n" + "Stock: " + a.getStock()));
                 break;
             case 5:
-
-                for (Categoria cat : repositorioCategoria.listarActivos()) {
-                    System.out.println("ID: " + cat.getId());
-                    System.out.println("Nombre: " + cat.getNombre());
-                    System.out.println("");
-                }
-
+                repositorioCategoria.listarActivos().stream()
+                        .forEach(sout -> System.out.println("ID: " + sout.getId() + "\n" + "Nombre: " + sout.getNombre()));
                 System.out.println("");
                 System.out.println("Elija un ID de la lista");
                 Long idCategoriaElegida = Long.parseLong(scanner.nextLine());
@@ -301,12 +299,8 @@ public class Main {
                         System.out.println("La categoria esta vacia");
                         break;
                     }
-                    for (Producto prod : productos) {
-                        System.out.println("ID: " + prod.getId());
-                        System.out.println("Nombre: " + prod.getNombre());
-                        System.out.println("Precio: $" + prod.getPrecio());
-                        System.out.println("Stock: " + prod.getStock());
-                    }
+                    productos.stream()
+                            .forEach(prod -> System.out.println("ID: " + prod.getId() + "Nombre: " + prod.getNombre() + "Stock: " + prod.getStock()));
                 }
                 break;
         }
@@ -321,6 +315,9 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("1 Crear Usuario");
+        System.out.println("2 Modificar Usuario");
+        System.out.println("4 Listar Usuarios activos");
+        System.out.println("4 Buscar usuario por mail");
 
         int opcionUsuario = Integer.parseInt(scanner.nextLine());
         switch (opcionUsuario) {
@@ -362,14 +359,14 @@ public class Main {
                     handleMenu();
                 }
                 System.out.println("Elija un rol");
-                System.out.println("Ingrese A para ADMIN");
-                System.out.println("Ingrese U para USUARIO");
+                System.out.println("1 Para ADMIN");
+                System.out.println("2 para USUARIO");
                 String rolUsuario = scanner.nextLine();
                 Rol rolSeleccionado = null;
-                if (rolUsuario.trim().equalsIgnoreCase("u")) {
-                    rolSeleccionado = Rol.USUARIO;
-                } else if (rolUsuario.trim().equalsIgnoreCase("a")) {
+                if (rolUsuario.trim().equals("1")) {
                     rolSeleccionado = Rol.ADMIN;
+                } else if (rolUsuario.trim().equals("2")) {
+                    rolSeleccionado = Rol.USUARIO;
                 } else {
                     System.out.println("Opcion invalida");
                     handleMenu();
@@ -379,13 +376,179 @@ public class Main {
                         .apellido(apellidoUsuario)
                         .celular(celularUsuario)
                         .contrasenia(passwordUsuario)
+                        .mail(mailUsuario)
                         .rol(rolSeleccionado)
                         .build();
                 Usuario usuarioGestionado = repositorioUsuaraio.guardar(usuarioCreado);
                 System.out.println("Usuario guardado con ID: " + usuarioGestionado.getId());
                 break;
+            case 2:
+                repositorioUsuaraio.listarActivos().stream().forEach(u -> System.out.println("ID " + u.getId() + " Nombre: " + u.getNombre() + " " + u.getApellido() + " Email: " + u.getMail()));
+                System.out.println("");
+                System.out.println("Elija el ID de la lista a modificar");
+                Long idSeleccionado = Long.parseLong(scanner.nextLine());
+                Optional<Usuario> usuarioPorId = repositorioUsuaraio.buscarPorId(idSeleccionado);
+                if (!usuarioPorId.isPresent()) {
+                    System.out.println("ID no encontrado");
+                    handleUsuario();
+                }
+                usuarioGestionado = usuarioPorId.get();
+                System.out.println("Ingrese la opcion a modificar");
+                System.out.println("");
+                System.out.println("1 para modificar nombre");
+                System.out.println("2 para modificar apellido");
+                System.out.println("3 para modificar celular");
+                System.out.println("4 para modificar password");
+                System.out.println("5 para modificar mail");
+                System.out.println("0 Volver al menu principal");
+                int opcion = Integer.parseInt(scanner.nextLine());
+                switch (opcion) {
+                    case 0:
+                        handleMenu();
+                    case 1:
+                        System.out.println("Ingrese nombre");
+                        String nuevoNombre = scanner.nextLine();
+                        if (nuevoNombre.length() < 1) {
+                            System.out.println("El nombre no puede estar vacio");
+                            handleUsuario();
+                        }
+                        usuarioGestionado.setNombre(nuevoNombre);
+                        break;
+                    case 2:
+                        System.out.println("Ingrese apellido");
+                        String nuevoApellido = scanner.nextLine();
+                        if (nuevoApellido.length() < 1) {
+                            System.out.println("El apellido no puede estar vacio");
+                            handleUsuario();
+                        }
+                        usuarioGestionado.setApellido(nuevoApellido);
+                        break;
+                    case 3:
+                        System.out.println("Ingrese celular");
+                        String nuevoCelular = scanner.nextLine();
+                        usuarioGestionado.setCelular(nuevoCelular);
+                        break;
+                    case 4:
+                        System.out.println("Ingrese password");
+                        String nuevoPassword = scanner.nextLine();
+                        if (nuevoPassword.length() < 1) {
+                            System.out.println("El password no puede estar vacio");
+                            handleUsuario();
+                        }
+                        usuarioGestionado.setContrasenia(nuevoPassword);
+                        break;
+                    case 5:
+                        System.out.println("Ingrese mail");
+                        String nuevoMail = scanner.nextLine().toLowerCase().trim();
+                        Optional<Usuario> mailEncontrado = repositorioUsuaraio.buscarPorMail(nuevoMail);
+                        if (mailEncontrado.isPresent() || nuevoMail.length() < 1) {
+                            System.out.println("El mail ya esta registrado");
+                            handleUsuario();
+                        }
+                        usuarioGestionado.setMail(nuevoMail);
+                }
+                EntityManagerFactory emf = JPAUtil.getEmf();
+                EntityManager em = emf.createEntityManager();
+                try {
+                    em.getTransaction().begin();
+                    em.merge(usuarioGestionado);
+                    em.getTransaction().commit();
+                } finally {
+                    em.close();
+                }
+                break;
             case 4:
-                repositorioUsuaraio.listarActivos().stream().forEach(u -> System.out.println(u));
+                repositorioUsuaraio.listarActivos().stream().forEach(u -> System.out.println("ID " + u.getId() + " Nombre: " + u.getNombre() + " " + u.getApellido() + " Email: " + u.getMail()));
+                System.out.println("");
+                break;
+            case 5:
+                System.out.println("Ingrese el mail");
+                String mail = scanner.nextLine();
+                Optional<Usuario> encontrado = repositorioUsuaraio.buscarPorMail(mail);
+                if (!encontrado.isPresent()) {
+                    System.out.println("No se encontro el usuario");
+                    handleUsuario();
+                }
+                System.out.println(encontrado.get().toString());
+                break;
+        }
+        handleUsuario();
+    }
+
+    public void handlePedido() {
+        System.out.println("");
+        System.out.println("-- Gestion Pedido --");
+        System.out.println("");
+        PedidoRepository repositorioPedido = new PedidoRepository();
+        UsuarioRepository repositoryUsuario = new UsuarioRepository();
+        ProductoRepository repositorioProducto = new ProductoRepository();
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Ingrese la opcion deseada");
+        System.out.println("1 Para crear un Pedido");
+        System.out.println("2 Para crear un Pedido");
+
+        int option = Integer.parseInt(scanner.nextLine());
+        switch (option) {
+            case 1:
+                List<Usuario> usuarios = repositoryUsuario.listarActivos();
+                usuarios.stream().forEach(u -> System.out.println("ID " + u.getId() + " Nombre: " + u.getNombre() + " Email: " + u.getMail()));
+                if (usuarios.isEmpty()) {
+                    System.out.println("No existen usuarios crados");
+                    handleUsuario();
+                }
+                System.out.println("Elija el ID de un usuario");
+                Long id = Long.parseLong(scanner.nextLine());
+                Optional<Usuario> usuarioEcontrado = repositoryUsuario.buscarPorId(id);
+                if (!usuarioEcontrado.isPresent()) {
+                    System.out.println("El ID ingresadao no existe");
+                    handleUsuario();
+                }
+                System.out.println("Elija una forma de pago:");
+                System.out.println("1 Efectivo");
+                System.out.println("2 Tranferencia");
+                System.out.println("3 Tarjeta ");
+                int option2 = Integer.parseInt(scanner.nextLine());
+                FormaPago formaPago = null;
+                switch (option2) {
+                    case 1:
+                        formaPago = FormaPago.EFECTIVO;
+                        break;
+                    case 2:
+                        formaPago = FormaPago.TRANFERENCIA;
+                        break;
+                    case 3:
+                        formaPago = FormaPago.TARJETA;
+                        break;
+                }
+
+                List<Producto> productosAAgregar = new ArrayList<>();
+                Boolean seguir = true;
+                while (seguir) {
+                    repositorioProducto.listarActivos().stream().forEach(u -> {
+                        System.out.println("ID: " + u.getId() + " Nombre: " + u.getNombre() + " Precio: $" + u.getPrecio() + " Stock: $" + u.getStock());
+                    });
+                    Long idProducto = Long.parseLong(scanner.nextLine());
+                    Optional<Producto> productoEcontrado = repositorioProducto.buscarPorId(idProducto);
+                    if (!productoEcontrado.isPresent() || !productoEcontrado.get().getDisponible()) {
+                        System.out.println("Producto no encontrado");
+                        continue;
+                    }
+                    int stockDiponible = productoEcontrado.get().getStock();
+                    System.out.println("Ingrese la cantidad, stock disponible: " + stockDiponible);
+                    int cantidad = Integer.parseInt(scanner.nextLine());
+                    if (cantidad < 1 || cantidad > stockDiponible) {
+                        System.out.println("La cantidad no puede ser 0 o menor al stock disponible");
+                        continue;
+                    }
+                    productosAAgregar.add(productoEcontrado.get());
+                    System.out.println("Desea agregar otro producto?");
+                    System.out.println("1 Si");
+                    System.out.println("2 No");
+                    String opcion = scanner.nextLine();
+                    seguir = opcion.trim().equals("1");
+                }
+
         }
     }
 
