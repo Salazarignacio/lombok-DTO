@@ -54,7 +54,7 @@ public class Pedido extends Base implements Calculable {
     }
 
     public void calcularTotal() {
-        this.total = detallePedidos.stream()
-                .map(det -> det.getSubtotal()).reduce(0.0, (a, b) -> a + b);
+        System.out.println(this.total = detallePedidos.stream()
+                .map(det -> det.getSubtotal()).reduce(0.0, (a, b) -> a + b));
     }
 }

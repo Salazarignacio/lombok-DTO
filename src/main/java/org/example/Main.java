@@ -16,6 +16,7 @@ import org.example.util.JPAUtil;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Main {
@@ -487,7 +488,11 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Ingrese la opcion deseada");
         System.out.println("1 Para crear un Pedido");
-        System.out.println("2 Para crear un Pedido");
+        System.out.println("2 Para Modificar estado");
+        System.out.println("3 Para Eliminar Pedido");
+        System.out.println("4 Para Ver Pedidos");
+        System.out.println("5 Para Ver Pedidos de un usuario especifico");
+        System.out.println("0 Volver al menu principal");
         FormaPago formaPago = null;
         int option = Integer.parseInt(scanner.nextLine());
         switch (option) {
@@ -580,7 +585,6 @@ public class Main {
                             System.out.println("Subtotal: $" + detallePedido.getSubtotal());
                             pedido.addDetallePedido(cantidad, prodEncontrado.get());
                         }
-
                     }
 
                     pedido.calcularTotal();
@@ -595,17 +599,76 @@ public class Main {
                     }
                     em.persist(pedido);
                     em.getTransaction().commit();
-                        pedido.calcularTotal();
-                        System.out.println("Pedido generado ID: " + pedido.getId() + " fecha: " + pedido.getFecha() + " Usuario " + pedido.getUsuario() + " Forma de pago: " + pedido.getFormaPago());
-                        System.out.println(" Productos: " + pedido.getDetallePedidos());
+                    pedido.calcularTotal();
+                    Set<DetallePedido> detalles = pedido.getDetallePedidos();
+                    System.out.println("Pedido generado ID: " + pedido.getId() + " fecha: " + pedido.getCreatedAt() + " Usuario " + pedido.getUsuario().getNombre() + " " + pedido.getUsuario().getApellido() + " Forma de pago: " + pedido.getFormaPago());
+                    detalles.stream().forEach(det -> System.out.println("Producto" + det.getProducto().getNombre() + " " + det.getCantidad() + " x  $" + det.getProducto().getPrecio() + " Subtotal: $" + det.getSubtotal()));
                 } catch (Exception e) {
                     em.getTransaction().rollback();
                     throw new RuntimeException(e);
                 } finally {
                     em.close();
                 }
-
+            case 2:
+                System.out.println("Ingrese el ID del pedido");
+                Long idPedido = Long.parseLong(scanner.nextLine());
+                Optional<Pedido> pedidoBuscado = repositorioPedido.buscarPorId(idPedido);
+                if (!pedidoBuscado.isPresent()) {
+                    System.out.println("No se encontro el pedido buscado");
+                    break;
+                }
+                System.out.println("Pedido con estado " + pedidoBuscado.get().getEstado());
+                System.out.println("Ingrese el numero de estado que desea");
+                System.out.println("1 PENDIENTE");
+                System.out.println("2 CONFIRMADO");
+                System.out.println("3 TERMINADO");
+                System.out.println("4 CANCELADO");
+                Estado estado = Estado.PENDIENTE;
+                int opcion = Integer.parseInt(scanner.nextLine());
+                switch (opcion) {
+                    case 1:
+                        estado = Estado.PENDIENTE;
+                        break;
+                    case 2:
+                        estado = Estado.CONFRIMADO;
+                        break;
+                    case 3:
+                        estado = Estado.TERMINADO;
+                        break;
+                    case 4:
+                        estado = Estado.CANCELADO;
+                        break;
+                }
+                pedidoBuscado.get().setEstado(estado);
+                repositorioPedido.guardar(pedidoBuscado.get());
+                break;
+            case 3:
+                System.out.println("Ingrese el ID del pedido a eliminar");
+                Long idPedido2 = Long.parseLong(scanner.nextLine());
+                Optional<Pedido> pedidoAEliminar = repositorioPedido.buscarPorId(idPedido2);
+                if (!pedidoAEliminar.isPresent() || pedidoAEliminar.get().isEliminado()) {
+                    System.out.println("No se encuentra pedido");
+                    break;
+                }
+                repositorioPedido.eliminarLogico(idPedido2);
+                System.out.println("Pedido eliminado");
+                break;
+            case 4:
+                repositorioPedido.listarActivos().stream().forEach(System.out::println);
+                break;
+            case 5:
+                System.out.println("Ingrese el ID del usuario");
+                Long idUsuario = Long.parseLong(scanner.nextLine());
+                List<Pedido> pedidosActivos = repositorioPedido.listarActivos();
+                List<Pedido> usuariosConPedidos = pedidosActivos.stream().filter(u -> u.getUsuario().getId() == idUsuario).collect(Collectors.toList());
+                System.out.println("##################################");
+                usuariosConPedidos.stream().forEach(u -> {
+                    System.out.println(u.getId() + " " + u.getCreatedAt() + " " + u.getEstado());
+                });
+                /*usuariosConPedidos.stream().forEach(u -> u.calcularTotal());*/
+                break;
         }
+        handlePedido();
     }
 
     public static void handleMenu() {
