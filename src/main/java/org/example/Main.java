@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManagerFactory;
 
 import jakarta.persistence.Persistence;
 import org.example.model.*;
+import org.example.model.enums.Estado;
 import org.example.model.enums.FormaPago;
 import org.example.model.enums.Rol;
 import org.example.repository.CategoriaRepository;
@@ -316,7 +317,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1 Crear Usuario");
         System.out.println("2 Modificar Usuario");
-        System.out.println("4 Listar Usuarios activos");
+        System.out.println("3 Listar Usuarios activos");
         System.out.println("4 Buscar usuario por mail");
 
         int opcionUsuario = Integer.parseInt(scanner.nextLine());
@@ -457,11 +458,11 @@ public class Main {
                     em.close();
                 }
                 break;
-            case 4:
+            case 3:
                 repositorioUsuaraio.listarActivos().stream().forEach(u -> System.out.println("ID " + u.getId() + " Nombre: " + u.getNombre() + " " + u.getApellido() + " Email: " + u.getMail()));
                 System.out.println("");
                 break;
-            case 5:
+            case 4:
                 System.out.println("Ingrese el mail");
                 String mail = scanner.nextLine();
                 Optional<Usuario> encontrado = repositorioUsuaraio.buscarPorMail(mail);
@@ -475,7 +476,7 @@ public class Main {
         handleUsuario();
     }
 
-    public void handlePedido() {
+    public static void handlePedido() {
         System.out.println("");
         System.out.println("-- Gestion Pedido --");
         System.out.println("");
@@ -487,7 +488,7 @@ public class Main {
         System.out.println("Ingrese la opcion deseada");
         System.out.println("1 Para crear un Pedido");
         System.out.println("2 Para crear un Pedido");
-
+        FormaPago formaPago = null;
         int option = Integer.parseInt(scanner.nextLine());
         switch (option) {
             case 1:
@@ -509,7 +510,7 @@ public class Main {
                 System.out.println("2 Tranferencia");
                 System.out.println("3 Tarjeta ");
                 int option2 = Integer.parseInt(scanner.nextLine());
-                FormaPago formaPago = null;
+
                 switch (option2) {
                     case 1:
                         formaPago = FormaPago.EFECTIVO;
@@ -524,13 +525,21 @@ public class Main {
 
                 Map<Long, Integer> productosAAgregar = new HashMap<>();
                 Boolean seguir = true;
+                if (repositorioProducto.listarActivos().size() == 0) {
+                    System.out.println("No existen productos en el usuario");
+                    handlePedido();
+                }
                 while (seguir) {
                     repositorioProducto.listarActivos().stream().forEach(u -> {
-                        System.out.println("ID: " + u.getId() + " Nombre: " + u.getNombre() + " Precio: $" + u.getPrecio() + " Stock: $" + u.getStock());
+                        System.out.println("ID: " + u.getId() + " Nombre: " + u.getNombre() + " Precio: $" + u.getPrecio() + " Stock: " + u.getStock());
                     });
+                    System.out.println("0 Para volver al menu ");
                     Long idProducto = Long.parseLong(scanner.nextLine());
+                    if (idProducto == 0) {
+                        handlePedido();
+                    }
                     Optional<Producto> productoEncontrado = repositorioProducto.buscarPorId(idProducto);
-                    if (!productoEncontrado.isPresent() || !productoEncontrado.get().getDisponible()) {
+                    if (!productoEncontrado.isPresent() || productoEncontrado.get().isEliminado()) {
                         System.out.println("Producto no encontrado");
                         continue;
                     }
@@ -542,11 +551,58 @@ public class Main {
                         continue;
                     }
                     productosAAgregar.put(productoEncontrado.get().getId(), cantidad);
+                    System.out.println(productosAAgregar.toString());
                     System.out.println("Desea agregar otro producto?");
                     System.out.println("1 Si");
                     System.out.println("2 No");
                     String opcion = scanner.nextLine();
                     seguir = opcion.trim().equals("1");
+                }
+                if (productosAAgregar.isEmpty()) {
+                    System.out.println("No se han agregado productos en el pedido. El pedido debe tener al menos un producto");
+                    handlePedido();
+                }
+                EntityManagerFactory emf = JPAUtil.getEmf();
+                EntityManager em = emf.createEntityManager();
+                try {
+                    em.getTransaction().begin();
+                    Pedido pedido = Pedido.builder()
+                            .estado(Estado.PENDIENTE)
+                            .formaPago(formaPago)
+                            .usuario(usuarioEcontrado.get())
+                            .build();
+                    for (Map.Entry<Long, Integer> entry : productosAAgregar.entrySet()) {
+                        Long idProd = entry.getKey();
+                        int cantidad = entry.getValue();
+                        Optional<Producto> prodEncontrado = Optional.ofNullable(em.find(Producto.class, idProd));
+                        if (prodEncontrado.isPresent()) {
+                            DetallePedido detallePedido = new DetallePedido(cantidad, prodEncontrado.get());
+                            System.out.println("Subtotal: $" + detallePedido.getSubtotal());
+                            pedido.addDetallePedido(cantidad, prodEncontrado.get());
+                        }
+
+                    }
+
+                    pedido.calcularTotal();
+
+                    for (Map.Entry<Long, Integer> entry : productosAAgregar.entrySet()) {
+                        Long idProd = entry.getKey();
+                        int cantidad = entry.getValue();
+                        Optional<Producto> prod = repositorioProducto.buscarPorId(idProd);
+                        if (prod.isPresent()) {
+                            prod.get().setStock(prod.get().getStock() - cantidad);
+                        }
+                    }
+                    em.persist(pedido);
+                    em.getTransaction().commit();
+                        pedido.calcularTotal();
+                        System.out.println("Pedido generado ID: " + pedido.getId() + " fecha: " + pedido.getFecha() + " Usuario " + pedido.getUsuario() + " Forma de pago: " + pedido.getFormaPago());
+                        System.out.println(" Productos: " + pedido.getDetallePedidos());
+                } catch (Exception e) {
+                    em.getTransaction().rollback();
+                    throw new RuntimeException(e);
+                } finally {
+                    em.close();
                 }
 
         }
@@ -561,6 +617,7 @@ public class Main {
         System.out.println("1 Manejar Categorias");
         System.out.println("2 Manejar Productos");
         System.out.println("3 Manejar Usuarios");
+        System.out.println("4 Manejar Pedidos");
         System.out.println("0 Terminar");
         int opcion1 = scanner.nextInt();
         switch (opcion1) {
@@ -576,6 +633,8 @@ public class Main {
             case 3:
                 handleUsuario();
                 break;
+            case 4:
+                handlePedido();
         }
     }
 }

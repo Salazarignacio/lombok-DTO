@@ -39,7 +39,6 @@ public class Pedido extends Base implements Calculable {
 
     public void addDetallePedido(int cant, Producto prod) {
         DetallePedido det = new DetallePedido(cant, prod);
-
         detallePedidos.add(det);
     }
 
