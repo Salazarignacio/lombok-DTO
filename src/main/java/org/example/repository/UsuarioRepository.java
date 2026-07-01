@@ -29,7 +29,7 @@ public class UsuarioRepository extends BaseRepository<Usuario> {
         }
     }
 
-    public List<Pedido> BuscarPedidosPorUsuario(Long idUsuario) {
+    public List<Pedido> buscarPedidosPorUsuario(Long idUsuario) {
         EntityManager em = emf.createEntityManager();
         try {
             // Consulta JPQL: retorna los pedidos activos de un usuario.

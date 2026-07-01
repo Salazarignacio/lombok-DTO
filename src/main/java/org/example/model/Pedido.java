@@ -20,11 +20,12 @@ import java.util.Set;
 @Table(name = "PEDIDOS")
 public class Pedido extends Base implements Calculable {
     private LocalDate fecha;
+    @Enumerated(EnumType.STRING)
     private Estado estado;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @Transient
     private Double total;
+    @Enumerated(EnumType.STRING)
     private FormaPago formaPago;
 
     @ManyToOne
@@ -34,27 +35,28 @@ public class Pedido extends Base implements Calculable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<DetallePedido> detallePedidos = new HashSet<DetallePedido>();
+    @JoinColumn(name = "pedido_id", referencedColumnName = "id")
+    private Set<DetallePedido> detalles = new HashSet<DetallePedido>();
 
 
     public void addDetallePedido(int cant, Producto prod) {
         DetallePedido det = new DetallePedido(cant, prod);
-        detallePedidos.add(det);
+        detalles.add(det);
     }
 
     public java.util.Optional<DetallePedido> findDetallePedidoByProducto(Producto prod) {
-        return detallePedidos.stream()
+        return detalles.stream()
                 .filter(det -> det.getProducto().equals(prod))
                 .findFirst();
     }
 
     public void deleteDetallePedidoByProducto(Producto prod) {
         findDetallePedidoByProducto(prod)
-                .ifPresent(detallePedidos::remove);
+                .ifPresent(detalles::remove);
     }
 
     public void calcularTotal() {
-        System.out.println(this.total = detallePedidos.stream()
+        System.out.println(this.total = detalles.stream()
                 .map(det -> det.getSubtotal()).reduce(0.0, (a, b) -> a + b));
     }
 }

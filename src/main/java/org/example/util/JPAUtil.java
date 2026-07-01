@@ -7,11 +7,11 @@ import lombok.Getter;
 
 public class JPAUtil {
     @Getter
-    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidad");
+    private static final EntityManagerFactory entityManager = Persistence.createEntityManagerFactory("miUnidad");
 
     public static void close() {
-        if (emf != null && emf.isOpen()) {
-            emf.close();
+        if (entityManager != null && entityManager.isOpen()) {
+            entityManager.close();
         }
     }
 }

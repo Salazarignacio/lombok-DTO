@@ -23,6 +23,7 @@ public class Usuario extends Base {
     private String celular;
     @ToString.Exclude
     private String contrasenia;
+    @Enumerated(EnumType.STRING)
     private Rol rol;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, targetEntity = Pedido.class)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")

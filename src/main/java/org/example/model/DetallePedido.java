@@ -12,7 +12,6 @@ import java.util.Objects;
 @Table(name = "DETALLES_PEDIDO")
 public class DetallePedido extends Base {
     private int cantidad;
-    @Transient
     private Double subtotal;
     @ManyToOne
     @JoinColumn(name = "producto_id", referencedColumnName = "id")

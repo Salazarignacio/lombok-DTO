@@ -3,7 +3,6 @@ package org.example;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
-import jakarta.persistence.Persistence;
 import org.example.model.*;
 import org.example.model.enums.Estado;
 import org.example.model.enums.FormaPago;
@@ -14,7 +13,6 @@ import org.example.repository.ProductoRepository;
 import org.example.repository.UsuarioRepository;
 import org.example.util.JPAUtil;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -102,7 +100,7 @@ public class Main {
                             System.out.println("Descartado");
                             break;
                     }
-                    EntityManagerFactory emf = JPAUtil.getEmf();
+                    EntityManagerFactory emf = JPAUtil.getEntityManager();
                     EntityManager em = emf.createEntityManager();
                     try {
                         em.getTransaction().begin();
@@ -273,7 +271,7 @@ public class Main {
                             System.out.println("Descartado");
                             break;
                     }
-                    EntityManagerFactory emf = JPAUtil.getEmf();
+                    EntityManagerFactory emf = JPAUtil.getEntityManager();
                     EntityManager em = emf.createEntityManager();
                     em.getTransaction().begin();
                     em.merge(prodAModificar);
@@ -457,7 +455,7 @@ public class Main {
                         usuarioGestionado.setMail(nuevoMail);
                         break;
                 }
-                EntityManagerFactory emf = JPAUtil.getEmf();
+                EntityManagerFactory emf = JPAUtil.getEntityManager();
                 EntityManager em = emf.createEntityManager();
                 try {
                     em.getTransaction().begin();
@@ -546,7 +544,7 @@ public class Main {
                         formaPago = FormaPago.EFECTIVO;
                         break;
                     case 2:
-                        formaPago = FormaPago.TRANFERENCIA;
+                        formaPago = FormaPago.TRANSFERENCIA;
                         break;
                     case 3:
                         formaPago = FormaPago.TARJETA;
@@ -593,7 +591,7 @@ public class Main {
                     System.out.println("No se han agregado productos en el pedido. El pedido debe tener al menos un producto");
                     handlePedido();
                 }
-                EntityManagerFactory emf = JPAUtil.getEmf();
+                EntityManagerFactory emf = JPAUtil.getEntityManager();
                 EntityManager em = emf.createEntityManager();
                 try {
                     em.getTransaction().begin();
@@ -610,23 +608,15 @@ public class Main {
                             DetallePedido detallePedido = new DetallePedido(cantidad, prodEncontrado.get());
                             System.out.println("Subtotal: $" + detallePedido.getSubtotal());
                             pedido.addDetallePedido(cantidad, prodEncontrado.get());
+                            prodEncontrado.get().setStock(prodEncontrado.get().getStock() - cantidad);
                         }
                     }
 
                     pedido.calcularTotal();
-
-                    for (Map.Entry<Long, Integer> entry : productosAAgregar.entrySet()) {
-                        Long idProd = entry.getKey();
-                        int cantidad = entry.getValue();
-                        Optional<Producto> prod = repositorioProducto.buscarPorId(idProd);
-                        if (prod.isPresent()) {
-                            prod.get().setStock(prod.get().getStock() - cantidad);
-                        }
-                    }
                     em.persist(pedido);
                     em.getTransaction().commit();
                     pedido.calcularTotal();
-                    Set<DetallePedido> detalles = pedido.getDetallePedidos();
+                    Set<DetallePedido> detalles = pedido.getDetalles();
                     System.out.println("Pedido generado ID: " + pedido.getId() + " fecha: " + pedido.getCreatedAt() + " Usuario " + pedido.getUsuario().getNombre() + " " + pedido.getUsuario().getApellido() + " Forma de pago: " + pedido.getFormaPago());
                     detalles.forEach(det -> System.out.println("Producto" + det.getProducto().getNombre() + " " + det.getCantidad() + " x  $" + det.getProducto().getPrecio() + " Subtotal: $" + det.getSubtotal()));
                 } catch (Exception e) {
@@ -657,7 +647,7 @@ public class Main {
                         estado = Estado.PENDIENTE;
                         break;
                     case 2:
-                        estado = Estado.CONFRIMADO;
+                        estado = Estado.CONFIRMADO;
                         break;
                     case 3:
                         estado = Estado.TERMINADO;
@@ -701,6 +691,28 @@ public class Main {
         handlePedido();
     }
 
+    public static void handleReporte() {
+        System.out.println("-- Gestion Reporte --");
+        System.out.println("");
+        Scanner scanner = new Scanner(System.in);
+        CategoriaRepository categoriaRepo = new CategoriaRepository();
+        ProductoRepository prodRepo = new ProductoRepository();
+        UsuarioRepository usuarioRepo = new UsuarioRepository();
+
+        System.out.println("Ingrese la opcion deseada...");
+        System.out.println("1: Buscar productos por categoria");
+        int option = Integer.parseInt(scanner.nextLine());
+        switch (option) {
+            case 1:
+                categoriaRepo.listarActivos().forEach(u -> System.out.println("ID: " + u.getId() + " Nombre: " + u.getNombre()));
+                System.out.println("Elija el un ID de la lista");
+                long idCat = Long.parseLong(scanner.nextLine());
+                Optional<Categoria> categoriaBuscada = categoriaRepo.buscarPorId(idCat);
+
+                break;
+        }
+    }
+
     public static void handleMenu() {
         System.out.println("-- Menu Principal --");
         System.out.println("");
@@ -711,6 +723,7 @@ public class Main {
         System.out.println("2: Manejar Productos");
         System.out.println("3: Manejar Usuarios");
         System.out.println("4: Manejar Pedidos");
+        System.out.println("4: Manejar Reportes");
         System.out.println("0: Terminar");
         int opcion1 = scanner.nextInt();
         switch (opcion1) {
@@ -728,6 +741,9 @@ public class Main {
                 break;
             case 4:
                 handlePedido();
+                break;
+            case 5:
+                handleReporte();
                 break;
         }
     }

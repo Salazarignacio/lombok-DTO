@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public abstract class BaseRepository<T> {
-    protected final EntityManagerFactory emf = JPAUtil.getEmf();
+    protected final EntityManagerFactory emf = JPAUtil.getEntityManager();
     private final Class<T> clazz;
 
     public T guardar(T entity) {
@@ -62,13 +62,10 @@ public abstract class BaseRepository<T> {
 
     public boolean eliminarLogico(Long id) {
         EntityManager em = emf.createEntityManager();
-        Optional<T> optional = buscarPorId(id);
-        if (!optional.isPresent()) {
-            return false;
-        }
+
         try {
             em.getTransaction().begin();
-            T resultado = optional.get();
+            T resultado = em.find(clazz, id);
             if (resultado instanceof Base baseEntity) {
                 baseEntity.setEliminado(true);
             }
